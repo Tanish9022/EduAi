@@ -1000,7 +1000,7 @@ export default function MmccLandingPage() {
           </div>
 
           {/* FAQ Slide-Up Panel */}
-          {leadCaptured && showFaq && (
+          {showFaq && (
             <div className={`border-t shrink-0 max-h-[240px] overflow-y-auto ${
               chatTheme === "dark" ? "bg-[#18181b] border-gray-800" : "bg-white border-gray-200"
             }`}>
@@ -1067,7 +1067,7 @@ export default function MmccLandingPage() {
           )}
 
           {/* Footer Input Area */}
-          {leadCaptured && (
+          {true && (
             <div className={`border-t shrink-0 ${
               chatTheme === "dark" ? "bg-[#18181b] border-gray-800" : "bg-white border-gray-200"
             }`}>
