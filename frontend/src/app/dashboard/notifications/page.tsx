@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Bell, Send, Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { API_BASE_URL } from "@/config";
 
 export default function NotificationsPage() {
   const [message, setMessage] = useState("");
@@ -19,7 +20,8 @@ export default function NotificationsPage() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/notifications/broadcast", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/notifications/broadcast`, {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",

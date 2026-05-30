@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Users, Phone, Mail, Search, BookOpen, Calendar, Loader2, MessageSquare } from "lucide-react";
+import { API_BASE_URL } from "@/config";
 
 interface Enquiry {
   id: number;
@@ -25,7 +26,8 @@ export default function EnquiriesPage() {
     setIsFetching(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:8000/api/v1/ai/enquiries", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/enquiries`, {
+
         headers: {
           "Authorization": `Bearer ${token}`
         }

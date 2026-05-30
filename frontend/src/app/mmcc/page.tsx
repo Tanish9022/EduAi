@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { API_BASE_URL } from "@/config";
 import Link from "next/link";
 import { 
   BookOpen, 
@@ -195,7 +196,7 @@ export default function MmccLandingPage() {
     if (!msg || msg.role !== "assistant" || translatingIdx !== null) return;
     setTranslatingIdx(msgIndex);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/ai/translate", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/ai/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -233,7 +234,7 @@ export default function MmccLandingPage() {
     setErrorMsg(null);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/ai/enquiries", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/ai/enquiries`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -289,7 +290,7 @@ export default function MmccLandingPage() {
         content: m.content
       }));
 
-      const res = await fetch("http://localhost:8000/api/v1/ai/public-chat", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/ai/public-chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -859,7 +860,7 @@ export default function MmccLandingPage() {
                               }
                               setSubmittingLead(true);
                               try {
-                                const res = await fetch("http://localhost:8000/api/v1/ai/enquiries", {
+                                const res = await fetch(`${API_BASE_URL}/api/v1/ai/enquiries`, {
                                   method: "POST",
                                   headers: { "Content-Type": "application/json" },
                                   body: JSON.stringify({

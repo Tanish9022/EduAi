@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Phone, Copy, CheckCircle2, Loader2, MessageSquare } from "lucide-react";
+import { API_BASE_URL } from "@/config";
 
 interface WhatsAppMessage {
   id: number;
@@ -25,7 +26,8 @@ export default function WhatsAppPage() {
     setIsFetching(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:8000/api/v1/ai/chat-history", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/chat-history`, {
+
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (response.ok) {

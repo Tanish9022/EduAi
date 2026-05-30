@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
+import { API_BASE_URL } from "@/config";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -28,7 +29,8 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/auth/register-college?admin_name=${encodeURIComponent(formData.admin_name)}&admin_password=${encodeURIComponent(formData.admin_password)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register-college?admin_name=${encodeURIComponent(formData.admin_name)}&admin_password=${encodeURIComponent(formData.admin_password)}`, {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

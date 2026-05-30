@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, Clock, Users, FileText, Loader2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { API_BASE_URL } from "@/config";
 
 interface Overview {
   total_queries: number;
@@ -41,10 +42,11 @@ export default function AnalyticsPage() {
 
     try {
       const [overviewRes, timeRes, topRes] = await Promise.all([
-        fetch("http://localhost:8000/api/v1/analytics/overview", { headers }),
-        fetch(`http://localhost:8000/api/v1/analytics/queries-over-time?period=${period}`, { headers }),
-        fetch("http://localhost:8000/api/v1/analytics/top-questions", { headers })
+        fetch(`${API_BASE_URL}/api/v1/analytics/overview`, { headers }),
+        fetch(`${API_BASE_URL}/api/v1/analytics/queries-over-time?period=${period}`, { headers }),
+        fetch(`${API_BASE_URL}/api/v1/analytics/top-questions`, { headers })
       ]);
+
 
       if (overviewRes.ok) setOverview(await overviewRes.json());
       if (timeRes.ok) setOverTime(await timeRes.json());

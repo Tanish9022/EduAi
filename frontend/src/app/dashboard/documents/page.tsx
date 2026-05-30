@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { FileText, Upload, Trash2, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { API_BASE_URL } from "@/config";
 
 interface Document {
   name: string;
@@ -26,7 +27,7 @@ export default function DocumentsPage() {
     setIsFetching(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:8000/api/v1/ai/documents", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/documents`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -61,7 +62,7 @@ export default function DocumentsPage() {
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/ai/upload", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/upload`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -92,12 +93,13 @@ export default function DocumentsPage() {
 
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/ai/documents/${filename}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/documents/${filename}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
         }
       });
+
 
       if (!response.ok) {
         const data = await response.json();

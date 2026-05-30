@@ -1442,10 +1442,11 @@
   </div>
 
   <script>
-    // ==========================================
-    // --- WIDGET CONFIGURATION ---
-    // ==========================================
-    const API_URL = "http://localhost:8000"; 
+    // Auto-detect iframe embedding or URL query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const isEmbed = urlParams.get('embed') === 'true' || urlParams.get('inline') === 'true' || window.self !== window.top;
+    const collegeSlug = urlParams.get('slug') || urlParams.get('college') || "mmcc";
+    const API_URL = urlParams.get('api_url') || "http://localhost:8000";
     const API_PATH = "/api/v1/ai/public-chat";       
     const BOT_NAME = "Neha";
     const BOT_SUBTITLE = "Admissions Coordinator";
@@ -1455,15 +1456,10 @@
       "Tell me about B.Sc. Computer Science course",
       "How can I apply for admission?"
     ];
-    
     const API_HEADERS = {
       "Content-Type": "application/json"
     };
 
-    // Auto-detect iframe embedding or URL query params
-    const urlParams = new URLSearchParams(window.location.search);
-    const isEmbed = urlParams.get('embed') === 'true' || urlParams.get('inline') === 'true' || window.self !== window.top;
-    const collegeSlug = urlParams.get('slug') || urlParams.get('college') || "mmcc";
 
     // ==========================================
     // --- CHAT STATE MANAGER ---

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, User, Bot, Loader2, Sparkles, Clock, History } from "lucide-react";
+import { API_BASE_URL } from "@/config";
 
 interface Message {
   role: "user" | "ai";
@@ -45,7 +46,7 @@ export default function ChatMonitorPage() {
     setIsHistoryLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:8000/api/v1/ai/chat-history", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/chat-history`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (response.ok) {
@@ -70,7 +71,8 @@ export default function ChatMonitorPage() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/ai/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/ai/chat`, {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
