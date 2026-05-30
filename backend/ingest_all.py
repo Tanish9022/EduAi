@@ -23,7 +23,7 @@ def ingest_all():
         doc_processor = DocumentProcessor()
         vector_manager = VectorStoreManager(college_id=college.id)
         
-        storage_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "storage"))
+        storage_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "storage"))
         print(f"Reading files from: {storage_dir}")
         
         if not os.path.exists(storage_dir):

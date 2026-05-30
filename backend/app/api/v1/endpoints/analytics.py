@@ -10,7 +10,8 @@ from app.database.connection import get_db
 
 router = APIRouter()
 
-STORAGE_DIR = os.path.abspath(os.path.join(os.getcwd(), "..", "storage"))
+# Storage directory inside backend (relative to this file)
+STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "storage"))
 
 @router.get("/overview")
 async def get_analytics_overview(

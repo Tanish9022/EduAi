@@ -19,8 +19,8 @@ from app.core.ai_engine import get_query_engine, get_doc_processor, get_vector_m
 
 router = APIRouter()
 
-# Storage directory at project root (relative to this file)
-STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "storage"))
+# Storage directory inside backend (relative to this file)
+STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "storage"))
 if not os.path.exists(STORAGE_DIR):
     os.makedirs(STORAGE_DIR)
 

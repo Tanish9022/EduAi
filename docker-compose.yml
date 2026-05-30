@@ -30,7 +30,6 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - ./storage:/storage
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-tanish}@db:5432/${POSTGRES_DB:-eduai_db}
       CHROMADB_HOST: chromadb
