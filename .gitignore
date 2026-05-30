@@ -35,13 +35,10 @@ dist/
 # Database, Vector Store, & Storage
 postgres_data/
 chromadb_data/
-chroma_db/
-backend/chroma_db/
 *.db
 *.sqlite
 *.sqlite3
-storage/*
-!storage/.gitkeep
+
 
 # Operating System & IDEs
 .DS_Store
