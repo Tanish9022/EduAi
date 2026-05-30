@@ -1,0 +1,55 @@
+# Dependencies & Package Managers
+node_modules/
+frontend/node_modules/
+backend/venv/
+.venv/
+venv/
+env/
+ENV/
+*.tsbuildinfo
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Next.js & Build outputs
+.next/
+frontend/.next/
+out/
+build/
+dist/
+
+# Environment files & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Database, Vector Store, & Storage
+postgres_data/
+chromadb_data/
+chroma_db/
+backend/chroma_db/
+*.db
+*.sqlite
+*.sqlite3
+storage/*
+!storage/.gitkeep
+
+# Operating System & IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

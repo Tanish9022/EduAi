@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Assistant Chat Widget</title>
+  
+  <!-- Premium Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- CSS RESET & VARIABLES --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    :root {
+      /* Light Mode Palette (Minimalist Black & White) */
+      --bg-app: #f9fafb;
+      --bg-widget: #ffffff;
+      --bg-header: #000000;
+      --text-header: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #52525b;
+      --border-color: #e4e4e7;
+      
+      --bubble-user: #000000;
+      --bubble-user-text: #ffffff;
+      --bubble-bot: #f4f4f5;
+      --bubble-bot-text: #0f172a;
+      
+      --chip-bg: #ffffff;
+      --chip-text: #0f172a;
+      --chip-border: #e4e4e7;
+      --chip-hover-bg: #000000;
+      --chip-hover-text: #ffffff;
+      --chip-hover-border: #000000;
+      
+      --input-bg: #ffffff;
+      --input-text: #0f172a;
+      --input-border: #e4e4e7;
+      --input-focus-border: #000000;
+      
+      --source-bg: #fafafa;
+      --source-border: #e4e4e7;
+      --source-text: #27272a;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+      
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-full: 9999px;
+      
+      --transition-speed: 0.2s;
+    }
+
+    [data-theme="dark"] {
+      /* Dark Mode Palette (Minimalist Black & White) */
+      --bg-app: #0a0a0a;
+      --bg-widget: #121212;
+      --bg-header: #1c1c1e;
+      --text-header: #ffffff;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --border-color: #27272a;
+      
+      --bubble-user: #f4f4f5;
+      --bubble-user-text: #0a0a0a;
+      --bubble-bot: #1c1c1e;
+      --bubble-bot-text: #f4f4f5;
+      
+      --chip-bg: #121212;
+      --chip-text: #e4e4e7;
+      --chip-border: #27272a;
+      --chip-hover-bg: #f4f4f5;
+      --chip-hover-text: #0a0a0a;
+      --chip-hover-border: #f4f4f5;
+      
+      --input-bg: #1c1c1e;
+      --input-text: #f4f4f5;
+      --input-border: #27272a;
+      --input-focus-border: #ffffff;
+      
+      --source-bg: #18181b;
+      --source-border: #27272a;
+      --source-text: #e4e4e7;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      background-color: var(--bg-app);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color var(--transition-speed) ease;
+    }
+
+    /* --- FLOATING ACTION BUTTON (FAB) --- */
+    .chat-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 65px;
+      height: 65px;
+      border-radius: var(--radius-full);
+      background-color: transparent;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 9999;
+      border: 4px solid #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: visible;
+    }
+
+    .chat-fab:hover {
+      transform: scale(1.08);
+    }
+
+    .chat-fab svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      transition: transform 0.2s;
+    }
+
+    /* --- POPUP SPEECH BUBBLE --- */
+    .popover-bubble {
+      position: fixed;
+      bottom: 32px;
+      right: 105px;
+      background-color: #ffffff;
+      color: #000000;
+      padding: 12px 18px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e4e4e7;
+      max-width: 260px;
+      z-index: 9999;
+      animation: popover-fade-in 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    [data-theme="dark"] .popover-bubble {
+      background-color: #1c1c1e;
+      color: #ffffff;
+      border-color: #27272a;
+    }
+
+    @keyframes popover-fade-in {
+      from { opacity: 0; transform: translateX(10px) scale(0.95); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    .popover-close-btn {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      background-color: #ef4444;
+      color: #ffffff;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s;
+      z-index: 10;
+    }
+
+    .popover-close-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .popover-close-btn svg {
+      width: 10px;
+      height: 10px;
+      stroke: currentColor;
+      stroke-width: 3.5;
+    }
+
+    .popover-text {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+
+    [data-theme="dark"] .popover-text {
+      color: #f4f4f5;
+    }
+
+    .popover-bubble::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -8px;
+      transform: translateY(-50%);
+      border-width: 8px 0 8px 8px;
+      border-style: solid;
+      border-color: transparent transparent transparent #ffffff;
+      display: block;
+      width: 0;
+      z-index: 2;
+    }
+
+    [data-theme="dark"] .popover-bubble::after {
+      border-color: transparent transparent transparent #1c1c1e;
+    }
+
+    .popover-bubble::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -9px;
+      transform: translateY(-50%);
+      border-width: 8px 0 8px 8px;
+      border-style: solid;
+      border-color: transparent transparent transparent #e4e4e7;
+      display: block;
+      width: 0;
+      z-index: 1;
+    }
+
+    [data-theme="dark"] .popover-bubble::before {
+      border-color: transparent transparent transparent #27272a;
+    }
+
+    /* Badge count */
+    .chat-fab-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background-color: #ef4444;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #000000;
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes pulse-badge {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* --- CHAT CONTAINER --- */
+    .chat-container {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 400px;
+      height: 600px;
+      max-height: calc(100vh - 120px);
+      max-width: calc(100vw - 48px);
+      background-color: var(--bg-widget);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9998;
+    }
+
+    .chat-container.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: all;
+    }
+
+    /* --- CHAT HEADER --- */
+    .chat-header {
+      background-color: var(--bg-header);
+      color: var(--text-header);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-avatar-wrapper {
+      position: relative;
+      width: 40px;
+      height: 40px;
+    }
+
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background-color: #ffffff;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 800;
+      font-size: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .chat-status-indicator {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 10px;
+      height: 10px;
+      background-color: #22c55e;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--bg-header);
+      animation: pulse-status 2s infinite;
+    }
+
+    @keyframes pulse-status {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    .chat-header-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .chat-header-text p {
+      font-size: 11px;
+      color: #a1a1aa;
+      font-weight: 500;
+    }
+
+    .chat-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0.8;
+      transition: opacity 0.2s, background-color 0.2s;
+    }
+
+    .header-btn:hover {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .header-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* --- CHAT BODY / MESSAGES AREA --- */
+    .chat-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar */
+    .chat-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-body::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: var(--radius-full);
+    }
+
+    /* Welcome Card */
+    .welcome-card {
+      background-color: var(--bg-widget);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 8px;
+      animation: fade-in 0.3s ease;
+    }
+
+    .welcome-card h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .welcome-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Messages styling */
+    .message-row {
+      display: flex;
+      width: 100%;
+      margin-bottom: 4px;
+      animation: message-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    @keyframes message-slide-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .message-row.bot {
+      justify-content: flex-start;
+    }
+
+    .message-wrapper {
+      max-width: 85%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-bubble {
+      padding: 12px 16px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .message-row.user .message-bubble {
+      background-color: var(--bubble-user);
+      color: var(--bubble-user-text);
+      border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+    }
+
+    .message-row.bot .message-bubble {
+      background-color: var(--bubble-bot);
+      color: var(--bubble-bot-text);
+      border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Basic Markdown support */
+    .message-bubble p {
+      margin-bottom: 8px;
+    }
+    .message-bubble p:last-child {
+      margin-bottom: 0;
+    }
+    .message-bubble ul, .message-bubble ol {
+      margin-left: 20px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    .message-bubble li {
+      margin-bottom: 4px;
+    }
+    .message-bubble a {
+      color: inherit;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    /* Timestamp */
+    .message-meta {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+      display: flex;
+      gap: 6px;
+    }
+    .message-row.user .message-meta {
+      justify-content: flex-end;
+    }
+
+    /* --- SUGGESTION CHIPS --- */
+    .suggestions-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      padding-bottom: 4px;
+    }
+
+    .suggestion-chip {
+      background-color: var(--chip-bg);
+      color: var(--chip-text);
+      border: 1px solid var(--chip-border);
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      animation: chip-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      opacity: 0;
+      transform: scale(0.85);
+      text-align: left;
+    }
+
+    @keyframes chip-pop {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .suggestion-chip:hover {
+      background-color: var(--chip-hover-bg);
+      color: var(--chip-hover-text);
+      border-color: var(--chip-hover-border);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* --- COLLAPSIBLE SOURCE CITATIONS --- */
+    .sources-accordion {
+      margin-top: 10px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 10px;
+      width: 100%;
+    }
+
+    .sources-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+      transition: color var(--transition-speed);
+      padding: 2px 0;
+    }
+
+    .sources-toggle:hover {
+      color: var(--text-primary);
+    }
+
+    .sources-toggle svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sources-toggle.expanded svg {
+      transform: rotate(180deg);
+    }
+
+    .sources-list {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+      animation: expand-sources 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes expand-sources {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sources-list.expanded {
+      display: flex;
+    }
+
+    .source-card {
+      background-color: var(--source-bg);
+      border: 1px solid var(--source-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--source-text);
+      line-height: 1.4;
+      transition: background-color var(--transition-speed);
+    }
+
+    .source-card:hover {
+      background-color: var(--border-color);
+    }
+
+    .source-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .source-title-row svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .source-snippet {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* --- TYPING INDICATOR --- */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+    }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background-color: var(--text-secondary);
+      border-radius: var(--radius-full);
+      opacity: 0.4;
+      animation: typing-bubble 1.4s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing-bubble {
+      0%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+      50% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
+    }
+
+    /* --- ERROR BUBBLE & RETRY --- */
+    .error-card {
+      background-color: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #ef4444;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      margin-top: 4px;
+      width: 100%;
+    }
+
+    .error-msg-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .error-msg-row svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .retry-btn {
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background-color var(--transition-speed);
+    }
+
+    [data-theme="dark"] .retry-btn {
+      background-color: #ffffff;
+      color: #0a0a0a;
+    }
+
+    .retry-btn:hover {
+      background-color: #27272a;
+    }
+
+    [data-theme="dark"] .retry-btn:hover {
+      background-color: #e4e4e7;
+    }
+
+    .retry-btn svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2.5;
+    }
+
+    /* --- INPUT AREA --- */
+    .chat-footer {
+      padding: 12px 16px;
+      background-color: var(--bg-widget);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 20px;
+      padding: 6px 6px 6px 14px;
+      transition: border-color var(--transition-speed);
+    }
+
+    .chat-input-row:focus-within {
+      border-color: var(--input-focus-border);
+    }
+
+    .chat-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13.5px;
+      color: var(--input-text);
+      max-height: 100px;
+      resize: none;
+      padding: 6px 0;
+      line-height: 1.4;
+    }
+
+    .chat-input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .send-btn {
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s, background-color var(--transition-speed), opacity 0.2s;
+      flex-shrink: 0;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    [data-theme="dark"] .send-btn {
+      background-color: #ffffff;
+      color: #0a0a0a;
+    }
+
+    .send-btn.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      background-color: #27272a;
+    }
+
+    [data-theme="dark"] .send-btn:hover {
+      background-color: #e4e4e7;
+    }
+
+    .send-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.5;
+      margin-left: 2px; /* optical centering */
+    }
+
+    .watermark {
+      font-size: 10px;
+      text-align: center;
+      color: var(--text-secondary);
+      opacity: 0.6;
+      font-weight: 500;
+      padding-top: 2px;
+    }
+
+    /* --- EMBED/INLINE MODE OVERRIDES --- */
+    body.embed-mode {
+      background-color: transparent;
+      padding: 0;
+      min-height: auto;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    body.embed-mode .chat-fab {
+      display: none !important;
+    }
+
+    body.embed-mode .chat-container {
+      position: relative;
+      bottom: auto;
+      right: auto;
+      width: 100%;
+      height: 100vh;
+      max-height: 100vh;
+      max-width: 100vw;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      opacity: 1;
+      pointer-events: all;
+      transform: none;
+    }
+    }
+    .error-text {
+      color: #ef4444;
+      font-size: 10.5px;
+      font-weight: 600;
+      margin-top: 2px;
+      display: none;
+    }
+
+    /* Language Bar Styling */
+    .lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 8px 16px;
+      background-color: var(--bg-widget);
+      border-bottom: 1px solid var(--border-color);
+      animation: fade-in 0.2s ease;
+      flex-shrink: 0;
+    }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-speed);
+    }
+    .lang-btn.active {
+      background-color: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+    [data-theme="dark"] .lang-btn.active {
+      background-color: #ffffff;
+      color: #0a0a0a;
+      border-color: #ffffff;
+    }
+    .lang-btn:hover:not(.active) {
+      border-color: var(--text-primary);
+      color: var(--text-primary);
+    }
+
+    /* Animation effects */
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* --- LEAD CAPTURE FORM --- */
+    .lead-form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 4px;
+      animation: fade-in 0.3s ease;
+    }
+
+    .lead-form-title {
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+    }
+
+    .lead-form-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .lead-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lead-input-group label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lead-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-md);
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      outline: none;
+      transition: border-color var(--transition-speed);
+    }
+
+    .lead-input:focus {
+      border-color: var(--input-focus-border);
+    }
+
+    .lead-submit-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: background-color var(--transition-speed), transform 0.1s;
+      margin-top: 8px;
+    }
+
+    [data-theme="dark"] .lead-submit-btn {
+      background-color: #ffffff;
+      color: #0a0a0a;
+    }
+
+    .lead-submit-btn:hover {
+      background-color: #27272a;
+    }
+
+    [data-theme="dark"] .lead-submit-btn:hover {
+      background-color: #e4e4e7;
+    }
+
+    .lead-submit-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .lead-whatsapp-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      background-color: #25D366;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: background-color var(--transition-speed), transform 0.1s;
+    }
+
+    .lead-whatsapp-btn:hover {
+      background-color: #128C7E;
+      color: #ffffff;
+    }
+
+    .lead-whatsapp-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* --- FAQ PANEL --- */
+    .faq-panel {
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-widget);
+      max-height: 240px;
+      overflow-y: auto;
+      flex-shrink: 0;
+      animation: fade-in 0.2s ease;
+    }
+
+    .faq-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px 4px;
+    }
+
+    .faq-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+
+    .faq-close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      transition: background-color var(--transition-speed);
+    }
+
+    .faq-close-btn:hover {
+      background-color: var(--chip-bg);
+    }
+
+    .faq-items {
+      padding: 4px 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .faq-item {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color var(--transition-speed);
+    }
+
+    .faq-item:hover {
+      border-color: var(--text-secondary);
+    }
+
+    .faq-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      width: 100%;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .faq-item-header span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .faq-item-header svg.faq-q-icon {
+      width: 11px;
+      height: 11px;
+      color: #A40C24;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .faq-item-header svg.faq-chevron {
+      width: 12px;
+      height: 12px;
+      color: var(--text-secondary);
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .faq-item.expanded .faq-chevron {
+      transform: rotate(90deg);
+    }
+
+    .faq-item-body {
+      padding: 0 12px 10px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      padding-left: 31px;
+      animation: fade-in 0.2s ease;
+    }
+
+    .faq-ask-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #A40C24;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .faq-ask-btn:hover {
+      text-decoration: underline;
+    }
+
+    .faq-ask-btn svg {
+      width: 9px;
+      height: 9px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* FAQ Toggle Button */
+    .faq-toggle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-widget);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all var(--transition-speed);
+    }
+
+    .faq-toggle-btn:hover {
+      border-color: var(--text-primary);
+      color: var(--text-primary);
+    }
+
+    .faq-toggle-btn.active {
+      background-color: #A40C24;
+      border-color: #A40C24;
+      color: #ffffff;
+    }
+
+    .faq-toggle-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- POPUP SPEECH BUBBLE -->
+  <div class="popover-bubble" id="popoverBubble" style="display: none;">
+    <button class="popover-close-btn" id="popoverCloseBtn" title="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="popover-text">Hey! I am Neha... Your Admission Assistant.</div>
+  </div>
+
+  <!-- FLOATING ACTION BUTTON (FAB) -->
+  <div class="chat-fab" id="chatFab">
+    <!-- Avatar Image -->
+    <img src="/neha_avatar.png" alt="Neha" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;" id="fabAvatarImg" />
+    <!-- Close Icon (hidden initially) -->
+    <svg id="fabIconClose" viewBox="0 0 24 24" style="display: none; width: 24px; height: 24px; color: #ffffff; stroke: currentColor; stroke-width: 2.5;">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <div class="chat-fab-badge" id="chatBadge" style="display: none;">1</div>
+  </div>
+
+  <!-- CHAT WINDOW CONTAINER -->
+  <div class="chat-container" id="chatContainer">
+    <!-- HEADER -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar-wrapper">
+          <img class="chat-avatar" id="botAvatar" src="/neha_avatar.png" alt="Neha" style="object-fit: cover;" />
+          <div class="chat-status-indicator"></div>
+        </div>
+        <div class="chat-header-text">
+          <h1 id="botTitle">Neha</h1>
+          <p id="botSubtitle">Admissions Counselor</p>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <!-- WhatsApp Bot redirect button -->
+        <a href="https://wa.me/919876543210?text=Hi%20Neha,%20I'm%20interested%20in%20MMCC%20Pune%20admissions." target="_blank" class="header-btn" title="Chat on WhatsApp" style="display: flex; justify-content: center; align-items: center;">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px; color: #25D366;">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.725 1.45 5.39-.002 9.775-4.394 9.777-9.789.002-2.614-1.012-5.071-2.855-6.914C16.454 2.058 13.99 1.039 11.373 1.04 5.98 1.043 1.595 5.436 1.593 10.832c-.001 1.625.485 3.21 1.402 4.62l-.993 3.626 3.714-.974zm11.104-5.088c-.305-.153-1.805-.89-2.083-.99-.278-.102-.48-.153-.682.153-.202.305-.783.99-.96 1.19-.177.204-.354.229-.658.077-2.95-1.474-4.805-4.469-4.805-4.469-.304-.52-.03-.787.23-1.043.235-.23.354-.383.48-.51.127-.127.177-.216.27-.407.093-.191.047-.357-.023-.51-.07-.153-.682-1.644-.934-2.253-.246-.593-.497-.513-.682-.523-.177-.01-.38-.01-.582-.01-.203 0-.532.076-.81.382-.278.305-1.062 1.04-1.062 2.54 0 1.5 1.089 2.948 1.239 3.15.152.204 2.144 3.273 5.193 4.59.724.314 1.29.502 1.73.642.727.23 1.39.197 1.913.12.583-.087 1.805-.738 2.058-1.45.253-.713.253-1.32.177-1.45-.077-.127-.278-.203-.582-.355z"/>
+          </svg>
+        </a>
+        <!-- Theme Toggle Button -->
+        <button class="header-btn" id="themeToggleBtn" title="Toggle theme">
+          <!-- Sun Icon (Dark Mode active) -->
+          <svg id="themeIconSun" viewBox="0 0 24 24" style="display: none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon Icon (Light Mode active) -->
+          <svg id="themeIconMoon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <!-- Close button (floating window only) -->
+        <button class="header-btn close-btn" id="closeChatBtn" title="Close chat">
+          <svg viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- LANGUAGE BAR (Shown by default) -->
+    <div class="lang-bar" id="langBar" style="display: flex;">
+      <button class="lang-btn active" data-lang="english">EN</button>
+      <button class="lang-btn" data-lang="hindi">हिंदी</button>
+      <button class="lang-btn" data-lang="marathi">मराठी</button>
+    </div>
+
+    <!-- MESSAGES LIST -->
+    <div class="chat-body" id="chatBody">
+      <!-- Welcome card -->
+      <div class="welcome-card" id="welcomeCard" style="display: none;">
+        <h2 id="welcomeTitle">Welcome to Admissions Support!</h2>
+        <p id="welcomeDesc">Ask any questions about admissions, course requirements, fee structures, or campus facilities below.</p>
+      </div>
+
+      <!-- Lead Capture Form -->
+      <div class="lead-form-container" id="leadFormContainer">
+        <h2 class="lead-form-title">Talk to Admissions Office</h2>
+        <p class="lead-form-subtitle">Enter your details to initiate a live conversation with Neha from our admissions desk.</p>
+        
+        <div class="lead-input-group">
+          <label for="leadName">Full Name</label>
+          <input type="text" id="leadName" class="lead-input" placeholder="e.g. Rahul Sharma" />
+          <div class="error-text" id="leadNameError">Please enter your name</div>
+        </div>
+        
+        <div class="lead-input-group">
+          <label for="leadPhone">Mobile Number</label>
+          <input type="tel" id="leadPhone" class="lead-input" placeholder="e.g. 9876543210" maxlength="10" />
+          <div class="error-text" id="leadPhoneError">Please enter a valid 10-digit phone number</div>
+        </div>
+        
+        <div class="lead-input-group">
+          <label for="leadEmail">Email Address (Optional)</label>
+          <input type="email" id="leadEmail" class="lead-input" placeholder="e.g. rahul@example.com" />
+          <div class="error-text" id="leadEmailError">Please enter a valid email address</div>
+        </div>
+
+        <div class="lead-input-group">
+          <label for="leadCourse">Course of Interest</label>
+          <select id="leadCourse" class="lead-input">
+            <option value="General Inquiry">General Inquiry</option>
+            <option value="B.Com">Bachelor of Commerce (B.Com)</option>
+            <option value="M.Com">Master of Commerce (M.Com)</option>
+            <option value="BBA">BBA (General Management)</option>
+            <option value="BBA-IB">BBA (International Business - IB)</option>
+            <option value="BBA-CA">BBA (Computer Applications - CA)</option>
+            <option value="B.Sc. CS">B.Sc. (Computer Science - CS)</option>
+          </select>
+        </div>
+
+        <div class="error-text" id="formGeneralError" style="text-align: center; margin-top: 5px;"></div>
+
+        <button class="lead-submit-btn" id="leadSubmitBtn">
+          Start Chatting
+          <svg viewBox="0 0 24 24">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+        <div style="text-align: center; font-size: 11px; color: var(--text-secondary); margin: 2px 0; font-weight: 600;">or</div>
+        <a href="https://wa.me/919876543210?text=Hi%20Neha,%20I'm%20interested%20in%20MMCC%20Pune%20admissions." target="_blank" class="lead-whatsapp-btn" id="leadWhatsappBtn">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.725 1.45 5.39-.002 9.775-4.394 9.777-9.789.002-2.614-1.012-5.071-2.855-6.914C16.454 2.058 13.99 1.039 11.373 1.04 5.98 1.043 1.595 5.436 1.593 10.832c-.001 1.625.485 3.21 1.402 4.62l-.993 3.626 3.714-.974zm11.104-5.088c-.305-.153-1.805-.89-2.083-.99-.278-.102-.48-.153-.682.153-.202.305-.783.99-.96 1.19-.177.204-.354.229-.658.077-2.95-1.474-4.805-4.469-4.805-4.469-.304-.52-.03-.787.23-1.043.235-.23.354-.383.48-.51.127-.127.177-.216.27-.407.093-.191.047-.357-.023-.51-.07-.153-.682-1.644-.934-2.253-.246-.593-.497-.513-.682-.523-.177-.01-.38-.01-.582-.01-.203 0-.532.076-.81.382-.278.305-1.062 1.04-1.062 2.54 0 1.5 1.089 2.948 1.239 3.15.152.204 2.144 3.273 5.193 4.59.724.314 1.29.502 1.73.642.727.23 1.39.197 1.913.12.583-.087 1.805-.738 2.058-1.45.253-.713.253-1.32.177-1.45-.077-.127-.278-.203-.582-.355z"/>
+          </svg>
+          WhatsApp Us Directly
+        </a>
+      </div>
+      
+      <!-- Suggestions wrapper inside chat list -->
+      <div class="suggestions-container" id="suggestionsContainer" style="display: none;"></div>
+    </div>
+
+    <!-- FAQ SLIDE-UP PANEL -->
+    <div class="faq-panel" id="faqPanel" style="display: none;">
+      <div class="faq-panel-header">
+        <div class="faq-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px; color: #A40C24;">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Frequently Asked</span>
+        </div>
+        <button class="faq-close-btn" id="faqCloseBtn" title="Close FAQ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="faq-items" id="faqItems">
+        <!-- FAQ items rendered by JS -->
+      </div>
+    </div>
+
+    <!-- FOOTER INPUT AREA -->
+    <div class="chat-footer" id="chatFooter" style="display: none;">
+      <div class="chat-input-row">
+        <button class="faq-toggle-btn" id="faqToggleBtn" title="Frequently Asked Questions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+        <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask Neha a question..." autocomplete="off"></textarea>
+        <button class="send-btn" id="sendBtn" title="Send message">
+          <svg viewBox="0 0 24 24">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <div class="watermark">Powered by EduAI Assist</div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // --- WIDGET CONFIGURATION ---
+    // ==========================================
+    const API_URL = "http://localhost:8000"; 
+    const API_PATH = "/api/v1/ai/public-chat";       
+    const BOT_NAME = "Neha";
+    const BOT_SUBTITLE = "Admissions Coordinator";
+    const SUGGESTIONS = [
+      "What UG courses are offered at MMCC Pune?",
+      "What is the eligibility criteria for BBA-CA?",
+      "Tell me about B.Sc. Computer Science course",
+      "How can I apply for admission?"
+    ];
+    
+    const API_HEADERS = {
+      "Content-Type": "application/json"
+    };
+
+    // Auto-detect iframe embedding or URL query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const isEmbed = urlParams.get('embed') === 'true' || urlParams.get('inline') === 'true' || window.self !== window.top;
+    const collegeSlug = urlParams.get('slug') || urlParams.get('college') || "mmcc";
+
+    // ==========================================
+    // --- CHAT STATE MANAGER ---
+    // ==========================================
+    let chatHistory = []; 
+    let isOpen = false;
+    let isWaitingResponse = false;
+    let suggestionsRendered = false;
+    let failedMessageBuffer = null; 
+    let selectedLanguage = "english";
+    let isLeadCaptured = localStorage.getItem('leadCaptured') === 'true';
+    let isFaqOpen = false;
+    let expandedFaqIdx = null;
+
+    // FAQ Data
+    const FAQ_DATA = [
+      { q: "What courses does MMCC Pune offer?", a: "MMCC offers B.Com, M.Com, BBA (General Management), BBA (International Business), BBA (Computer Applications), and B.Sc. (Computer Science)." },
+      { q: "What is the admission process?", a: "Admissions are through the Savitribai Phule Pune University centralized system along with direct college forms for specific merit intakes. You need to register online, submit documents, and wait for merit list announcements." },
+      { q: "What is the fee structure?", a: "Fee structures vary by course. Please ask Neha in the chat or visit the admissions office for the latest 2026-27 fee details." },
+      { q: "Are scholarships available?", a: "Yes, MMCC offers government scholarships under various categories. EBC, SBC, and other state-sponsored schemes are available for eligible students." },
+      { q: "What is the eligibility criteria?", a: "For UG courses: HSC (12th) pass from a recognized board. For BBA-CA/B.Sc. CS: Science or Commerce stream preferred. Specific percentage requirements vary by course." },
+      { q: "What are the college timings?", a: "College operates from 7:30 AM to 5:30 PM, Monday to Saturday. Library hours are extended until 7:00 PM." }
+    ];
+
+    // DOM Elements Cache
+    const chatFab = document.getElementById('chatFab');
+    const chatContainer = document.getElementById('chatContainer');
+    const closeChatBtn = document.getElementById('closeChatBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const suggestionsContainer = document.getElementById('suggestionsContainer');
+    const fabIconOpen = document.getElementById('fabIconOpen');
+    const fabIconClose = document.getElementById('fabIconClose');
+    const themeIconSun = document.getElementById('themeIconSun');
+    const themeIconMoon = document.getElementById('themeIconMoon');
+    const chatBadge = document.getElementById('chatBadge');
+    
+    const leadFormContainer = document.getElementById('leadFormContainer');
+    const welcomeCard = document.getElementById('welcomeCard');
+    const chatFooter = document.getElementById('chatFooter');
+    const langBar = document.getElementById('langBar');
+    const leadSubmitBtn = document.getElementById('leadSubmitBtn');
+    const faqPanel = document.getElementById('faqPanel');
+    const faqItems = document.getElementById('faqItems');
+    const faqToggleBtn = document.getElementById('faqToggleBtn');
+    const faqCloseBtn = document.getElementById('faqCloseBtn');
+
+    // UI Configuration Application
+    document.getElementById('botTitle').innerText = BOT_NAME;
+    document.getElementById('botSubtitle').innerText = "Online • " + BOT_SUBTITLE;
+
+    // ==========================================
+    // --- EVENT LISTENERS & INITS ---
+    // ==========================================
+    
+    if (isEmbed) {
+      document.body.classList.add('embed-mode');
+      isOpen = true;
+      loadChatWidget();
+    } else {
+      chatFab.addEventListener('click', toggleChatWindow);
+      closeChatBtn.addEventListener('click', () => toggleChatWindow(false));
+      
+      setTimeout(() => {
+        if (!isOpen && chatBadge) {
+          chatBadge.style.display = 'flex';
+        }
+      }, 5000);
+    }
+
+    chatInput.addEventListener('input', handleInputChange);
+    chatInput.addEventListener('keydown', handleKeyDown);
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Theme Toggle Handler
+    themeToggleBtn.addEventListener('click', toggleThemeMode);
+
+    // Lead Form Submit Handler
+    leadSubmitBtn.addEventListener('click', handleLeadSubmit);
+
+    // FAQ Toggle Handlers
+    faqToggleBtn.addEventListener('click', toggleFaqPanel);
+    faqCloseBtn.addEventListener('click', toggleFaqPanel);
+    renderFaqItems();
+
+    // Language Bar Handlers
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        selectedLanguage = e.target.getAttribute('data-lang');
+      });
+    });
+
+    // Init Theme (Detect system preference or previous storage)
+    const storedTheme = localStorage.getItem('chat-widget-theme');
+    if (storedTheme) {
+      setTheme(storedTheme);
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    }
+
+    // Initialize Lead Captured layout
+    initializeWidgetLayout();
+
+    // ==========================================
+    // --- LEAD CAPTURE HANDLER ---
+    // ==========================================
+    function initializeWidgetLayout() {
+      if (isLeadCaptured) {
+        leadFormContainer.style.display = 'none';
+        welcomeCard.style.display = 'block';
+        suggestionsContainer.style.display = 'flex';
+        chatFooter.style.display = 'block';
+        langBar.style.display = 'flex';
+        renderSuggestions();
+        
+        // Retrieve name if available and greet user if history is empty
+        const storedName = localStorage.getItem('leadName') || 'Student';
+        if (chatHistory.length === 0) {
+          const welcomeMsg = `Namaste ${storedName}! 🙏\n\n**I'm Neha from the Admissions Office at MMCC Pune. Admissions for 2026-27 are now open!**\n\nI can help you with course details, eligibility criteria, fee structure, scholarships, and the application process. What would you like to know?`;
+          appendMessage('bot', welcomeMsg);
+          chatHistory.push({ role: "assistant", content: welcomeMsg });
+        }
+      } else {
+        leadFormContainer.style.display = 'flex';
+        welcomeCard.style.display = 'none';
+        suggestionsContainer.style.display = 'none';
+        chatFooter.style.display = 'none';
+        langBar.style.display = 'flex';
+      }
+    }
+
+    async function handleLeadSubmit() {
+      // Clear previous error messages
+      document.getElementById('leadNameError').style.display = 'none';
+      document.getElementById('leadPhoneError').style.display = 'none';
+      document.getElementById('leadEmailError').style.display = 'none';
+      document.getElementById('formGeneralError').style.display = 'none';
+
+      const name = document.getElementById('leadName').value.trim();
+      const phone = document.getElementById('leadPhone').value.trim();
+      const email = document.getElementById('leadEmail').value.trim();
+      const course = document.getElementById('leadCourse').value;
+
+      let isValid = true;
+
+      if (!name) {
+        document.getElementById('leadNameError').style.display = 'block';
+        isValid = false;
+      }
+
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(phone)) {
+        document.getElementById('leadPhoneError').style.display = 'block';
+        isValid = false;
+      }
+
+      if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          document.getElementById('leadEmailError').style.display = 'block';
+          isValid = false;
+        }
+      }
+
+      if (!isValid) return;
+
+      leadSubmitBtn.disabled = true;
+      leadSubmitBtn.innerText = 'Connecting...';
+
+      try {
+        const response = await fetch(`${API_URL}/api/v1/ai/enquiries`, {
+          method: "POST",
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            name: name,
+            phone: phone,
+            email: email || null,
+            course: course,
+            college_slug: collegeSlug
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Server error saving enquiry');
+        }
+
+        // Save states
+        localStorage.setItem('leadCaptured', 'true');
+        localStorage.setItem('leadName', name);
+        isLeadCaptured = true;
+
+        // Transition layout
+        initializeWidgetLayout();
+      } catch (err) {
+        console.error("Failed to submit lead form:", err);
+        const genErr = document.getElementById('formGeneralError');
+        genErr.innerText = 'Unable to connect. Please try again.';
+        genErr.style.display = 'block';
+        leadSubmitBtn.disabled = false;
+        leadSubmitBtn.innerText = 'Start Chatting';
+      }
+    }
+
+    // ==========================================
+    // --- FLOATING WINDOW LOGIC ---
+    // ==========================================
+    function toggleChatWindow(forceState) {
+      const targetState = typeof forceState === 'boolean' ? forceState : !isOpen;
+      if (targetState === isOpen) return;
+      
+      isOpen = targetState;
+      
+      const fabAvatarImg = document.getElementById('fabAvatarImg');
+      const fabIconClose = document.getElementById('fabIconClose');
+      
+      if (isOpen) {
+        chatContainer.classList.add('active');
+        chatFab.classList.add('active');
+        if (fabAvatarImg) fabAvatarImg.style.display = 'none';
+        if (fabIconClose) fabIconClose.style.display = 'block';
+        chatFab.style.backgroundColor = '#000000';
+        if (chatBadge) chatBadge.style.display = 'none';
+        
+        hidePopoverBubble();
+        loadChatWidget();
+      } else {
+        chatContainer.classList.remove('active');
+        chatFab.classList.remove('active');
+        if (fabAvatarImg) fabAvatarImg.style.display = 'block';
+        if (fabIconClose) fabIconClose.style.display = 'none';
+        chatFab.style.backgroundColor = 'transparent';
+      }
+    }
+
+    function loadChatWidget() {
+      setTimeout(() => {
+        if (isLeadCaptured) {
+          chatInput.focus();
+        }
+        scrollToBottom();
+      }, 100);
+    }
+
+    // ==========================================
+    // --- THEME MANAGER ---
+    // ==========================================
+    function toggleThemeMode() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(nextTheme);
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('chat-widget-theme', theme);
+      
+      if (theme === 'dark') {
+        themeIconSun.style.display = 'block';
+        themeIconMoon.style.display = 'none';
+      } else {
+        themeIconSun.style.display = 'none';
+        themeIconMoon.style.display = 'block';
+      }
+    }
+
+    // ==========================================
+    // --- SUGGESTION CHIPS LOGIC ---
+    // ==========================================
+    function renderSuggestions() {
+      if (suggestionsRendered) return;
+      suggestionsContainer.innerHTML = '';
+      
+      SUGGESTIONS.forEach((text, index) => {
+        const chip = document.createElement('button');
+        chip.className = 'suggestion-chip';
+        chip.innerText = text;
+        chip.style.animationDelay = `${index * 0.05}s`;
+        
+        chip.addEventListener('click', () => {
+          chatInput.value = text;
+          handleInputChange();
+          sendMessage();
+          hideSuggestions();
+        });
+        
+        suggestionsContainer.appendChild(chip);
+      });
+      suggestionsRendered = true;
+    }
+
+    function hideSuggestions() {
+      suggestionsContainer.style.display = 'none';
+    }
+
+    // ==========================================
+    // --- FAQ PANEL LOGIC ---
+    // ==========================================
+    function toggleFaqPanel() {
+      isFaqOpen = !isFaqOpen;
+      expandedFaqIdx = null;
+      faqPanel.style.display = isFaqOpen ? 'block' : 'none';
+      faqToggleBtn.classList.toggle('active', isFaqOpen);
+      renderFaqItems();
+    }
+
+    function renderFaqItems() {
+      faqItems.innerHTML = '';
+      FAQ_DATA.forEach((faq, idx) => {
+        const item = document.createElement('div');
+        item.className = `faq-item${expandedFaqIdx === idx ? ' expanded' : ''}`;
+
+        const header = document.createElement('button');
+        header.className = 'faq-item-header';
+        header.innerHTML = `
+          <span>
+            <svg class="faq-q-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            ${escapeHtml(faq.q)}
+          </span>
+          <svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        `;
+        header.addEventListener('click', () => {
+          expandedFaqIdx = expandedFaqIdx === idx ? null : idx;
+          renderFaqItems();
+        });
+        item.appendChild(header);
+
+        if (expandedFaqIdx === idx) {
+          const body = document.createElement('div');
+          body.className = 'faq-item-body';
+          body.innerHTML = `
+            <div>${escapeHtml(faq.a)}</div>
+            <button class="faq-ask-btn" data-faq-idx="${idx}">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              Ask Neha about this
+            </button>
+          `;
+          const askBtn = body.querySelector('.faq-ask-btn');
+          askBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFaqPanel();
+            chatInput.value = faq.q;
+            handleInputChange();
+            sendMessage();
+            hideSuggestions();
+          });
+          item.appendChild(body);
+        }
+
+        faqItems.appendChild(item);
+      });
+    }
+
+    // ==========================================
+    // --- CORE MESSAGING LOGIC ---
+    // ==========================================
+    function handleInputChange() {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = (chatInput.scrollHeight - 6) + 'px';
+      
+      const hasValue = chatInput.value.trim().length > 0;
+      if (hasValue) {
+        sendBtn.classList.add('active');
+      } else {
+        sendBtn.classList.remove('active');
+      }
+    }
+
+    function handleKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text || isWaitingResponse) return;
+
+      failedMessageBuffer = null;
+
+      appendMessage('user', text);
+      chatHistory.push({ role: "user", content: text });
+
+      chatInput.value = '';
+      handleInputChange();
+      hideSuggestions();
+
+      const typingId = showTypingIndicator();
+      isWaitingResponse = true;
+
+      const startTime = Date.now();
+
+      try {
+        const responseData = await callRagBackend(text);
+        
+        // Enforce a minimum 1.2s delay to make typing animation feel natural and human-like
+        const elapsed = Date.now() - startTime;
+        const minDelay = 1200;
+        if (elapsed < minDelay) {
+          await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
+        }
+
+        removeTypingIndicator(typingId);
+        
+        appendMessage('bot', responseData.answer, responseData.sources);
+        chatHistory.push({ role: "assistant", content: responseData.answer });
+      } catch (err) {
+        console.error("Chat API error:", err);
+        removeTypingIndicator(typingId);
+        failedMessageBuffer = text;
+        appendErrorCard("I'm having trouble connecting to the admissions system. Please check your network and try again.");
+      } finally {
+        isWaitingResponse = false;
+        scrollToBottom();
+      }
+    }
+
+    async function retryMessage() {
+      const text = failedMessageBuffer;
+      if (!text || isWaitingResponse) return;
+
+      const lastChild = chatBody.lastElementChild;
+      if (lastChild && lastChild.classList.contains('error-card')) {
+        lastChild.remove();
+      }
+
+      failedMessageBuffer = null;
+      const typingId = showTypingIndicator();
+      isWaitingResponse = true;
+
+      const startTime = Date.now();
+
+      try {
+        const responseData = await callRagBackend(text);
+
+        const elapsed = Date.now() - startTime;
+        const minDelay = 1200;
+        if (elapsed < minDelay) {
+          await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
+        }
+
+        removeTypingIndicator(typingId);
+        
+        appendMessage('bot', responseData.answer, responseData.sources);
+        chatHistory.push({ role: "assistant", content: responseData.answer });
+      } catch (err) {
+        console.error("Retry API error:", err);
+        removeTypingIndicator(typingId);
+        failedMessageBuffer = text;
+        appendErrorCard("Connection failed again. Check your settings.");
+      } finally {
+        isWaitingResponse = false;
+        scrollToBottom();
+      }
+    }
+
+    // ==========================================
+    // --- API CLIENT ---
+    // ==========================================
+    async function callRagBackend(question) {
+      const payload = {
+        college_slug: collegeSlug,
+        question: question,
+        conversation_history: chatHistory,
+        language: selectedLanguage
+      };
+
+      const response = await fetch(`${API_URL}${API_PATH}`, {
+        method: "POST",
+        headers: API_HEADERS,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    }
+
+    // ==========================================
+    // --- DOM MANIPULATIONS ---
+    // ==========================================
+    function appendMessage(sender, text, sources) {
+      const row = document.createElement('div');
+      row.className = `message-row ${sender}`;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'message-wrapper';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      
+      bubble.innerHTML = parseMarkdown(text);
+      wrapper.appendChild(bubble);
+
+      if (sender === 'bot' && sources && Array.isArray(sources) && sources.length > 0) {
+        const accordion = renderSourcesAccordion(sources);
+        wrapper.appendChild(accordion);
+      }
+      
+      const meta = document.createElement('div');
+      meta.className = 'message-meta';
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      meta.innerHTML = `<span>${timeStr}</span>`;
+      wrapper.appendChild(meta);
+
+      row.appendChild(wrapper);
+      chatBody.appendChild(row);
+      scrollToBottom();
+    }
+
+    function appendErrorCard(errorMessage) {
+      const card = document.createElement('div');
+      card.className = 'error-card';
+      
+      card.innerHTML = `
+        <div class="error-msg-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>${errorMessage}</span>
+        </div>
+        <button class="retry-btn" id="tempRetryBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+          </svg>
+          Retry Question
+        </button>
+      `;
+
+      chatBody.appendChild(card);
+      
+      const retryBtnEl = card.querySelector('#tempRetryBtn');
+      if (retryBtnEl) {
+        retryBtnEl.addEventListener('click', retryMessage);
+        retryBtnEl.id = '';
+      }
+      
+      scrollToBottom();
+    }
+
+    function showTypingIndicator() {
+      const row = document.createElement('div');
+      row.className = 'message-row bot';
+      row.id = 'tempTypingIndicator';
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'message-wrapper';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      
+      const indicator = document.createElement('div');
+      indicator.className = 'typing-indicator';
+      indicator.innerHTML = '<span></span><span></span><span></span>';
+      
+      bubble.appendChild(indicator);
+      wrapper.appendChild(bubble);
+      row.appendChild(wrapper);
+      chatBody.appendChild(row);
+      
+      scrollToBottom();
+      return row.id;
+    }
+
+    function removeTypingIndicator(id) {
+      const indicator = document.getElementById(id);
+      if (indicator) {
+        indicator.remove();
+      }
+    }
+
+    function renderSourcesAccordion(sources) {
+      const accordion = document.createElement('div');
+      accordion.className = 'sources-accordion';
+      
+      const toggle = document.createElement('div');
+      toggle.className = 'sources-toggle';
+      toggle.innerHTML = `
+        <svg viewBox="0 0 24 24">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+        <span>Sources (${sources.length})</span>
+      `;
+      
+      const list = document.createElement('div');
+      list.className = 'sources-list';
+      
+      sources.forEach(src => {
+        const sourceCard = document.createElement('div');
+        sourceCard.className = 'source-card';
+        
+        let title = "Document Source";
+        let snippet = "";
+
+        if (typeof src === 'string') {
+          title = src;
+        } else if (typeof src === 'object' && src !== null) {
+          title = src.title || src.filename || src.source || "Document Source";
+          snippet = src.snippet || src.text || src.content || "";
+        }
+
+        sourceCard.innerHTML = `
+          <div class="source-title-row">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>${escapeHtml(title)}</span>
+          </div>
+          ${snippet ? `<div class="source-snippet">${escapeHtml(snippet)}</div>` : ''}
+        `;
+        list.appendChild(sourceCard);
+      });
+
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('expanded');
+        list.classList.toggle('expanded');
+        setTimeout(scrollToBottom, 50);
+      });
+
+      accordion.appendChild(toggle);
+      accordion.appendChild(list);
+      return accordion;
+    }
+
+    function scrollToBottom() {
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // ==========================================
+    // --- TEXT UTILS & MARKDOWN PARSER ---
+    // ==========================================
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    function parseMarkdown(text) {
+      let html = escapeHtml(text);
+
+      html = html.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+      html = html.replace(/(\*|_)(.*?)\1/g, '<em>$2</em>');
+      html = html.replace(/\[(.*?)\]\((https?:\/\/.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+      const paragraphs = html.split(/\n\n+/);
+      const formattedParagraphs = paragraphs.map(p => {
+        if (p.trim().startsWith('- ') || p.trim().startsWith('* ') || p.trim().startsWith('• ')) {
+          const items = p.split(/\n[-*•]\s+/);
+          if (items[0]) {
+            items[0] = items[0].replace(/^[-*•]\s+/, '');
+          }
+          const listHtml = items.map(item => `<li>${item.replace(/\n/g, '<br>')}</li>`).join('');
+          return `<ul>${listHtml}</ul>`;
+        }
+        
+        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+      });
+
+      return formattedParagraphs.join('');
+    }
+
+    // ==========================================
+    // --- POPOVER BUBBLE LOGIC ---
+    // ==========================================
+    const popoverBubble = document.getElementById('popoverBubble');
+    const popoverCloseBtn = document.getElementById('popoverCloseBtn');
+
+    if (popoverCloseBtn && popoverBubble) {
+      popoverCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hidePopoverBubble();
+      });
+
+      popoverBubble.addEventListener('click', () => {
+        toggleChatWindow(true);
+      });
+    }
+
+    function hidePopoverBubble() {
+      if (popoverBubble) {
+        popoverBubble.style.display = 'none';
+      }
+      localStorage.setItem('popoverDismissed', 'true');
+    }
+
+    // Initialize Popover display state
+    setTimeout(() => {
+      const isPopoverDismissed = localStorage.getItem('popoverDismissed') === 'true';
+      if (!isPopoverDismissed && !isOpen && !isEmbed && popoverBubble) {
+        popoverBubble.style.display = 'flex';
+      }
+    }, 1500); // 1.5s delay to feel natural
+  </script>
+</body>
+</html>
