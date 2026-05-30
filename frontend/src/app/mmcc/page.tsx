@@ -316,10 +316,10 @@ export default function MmccLandingPage() {
       }
 
       setMessages(prev => {
-        const nextMsgs = [
+        const nextMsgs: Message[] = [
           ...prev,
           {
-            role: "assistant",
+            role: "assistant" as const,
             content: data.answer,
             sources: data.sources,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -328,7 +328,7 @@ export default function MmccLandingPage() {
 
         if (isFeeQuery && !feeFormSubmitted) {
           nextMsgs.push({
-            role: "assistant",
+            role: "assistant" as const,
             content: "To get the in-depth fee structures, seat intake limits, and custom fee concessions for your category, please fill out your details below. Once submitted, we will redirect you to WhatsApp for direct counselor support:",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             showForm: true
