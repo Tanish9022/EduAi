@@ -19,8 +19,8 @@ from app.core.ai_engine import get_query_engine, get_doc_processor, get_vector_m
 
 router = APIRouter()
 
-# Storage directory at project root
-STORAGE_DIR = os.path.abspath(os.path.join(os.getcwd(), "..", "storage"))
+# Storage directory at project root (relative to this file)
+STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "storage"))
 if not os.path.exists(STORAGE_DIR):
     os.makedirs(STORAGE_DIR)
 
@@ -116,13 +116,16 @@ async def public_chat(
     try:
         start_time = time.time()
         
-        # Prepend translation instruction to LLM query if language is specified
-        llm_query = query
-        if request.language:
-            llm_query = f"IMPORTANT: Please respond to this question completely in the {request.language} language. Keep the tone friendly and natural as an admissions officer.\n\n{query}"
-            
-        result = query_engine.answer_question_with_sources(llm_query, request.conversation_history)
+        # Query in English for best context matching
+        result = query_engine.answer_question_with_sources(query, request.conversation_history)
         answer = safety.check_output(result["answer"])
+        
+        # Translate final answer post-generation if target language is not English
+        if request.language and request.language.lower() != "english":
+            try:
+                answer = query_engine.translate(answer, request.language)
+            except Exception as tr_err:
+                print(f"DEBUG: Translation failed: {tr_err}")
         response_time_ms = int((time.time() - start_time) * 1000)
 
         # Log to DB
