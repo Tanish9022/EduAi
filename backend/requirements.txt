@@ -9,6 +9,7 @@ google-generativeai
 langchain-google-genai
 python-dotenv
 alembic
+bcrypt==4.0.1
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
