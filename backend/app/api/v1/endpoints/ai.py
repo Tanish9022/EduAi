@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from pydantic import BaseModel
 import os
 import shutil
@@ -14,6 +14,7 @@ from app.ai_engine.document_processor import DocumentProcessor
 from app.ai_engine.vector_store import VectorStoreManager
 from app.ai_engine.query_engine import QueryEngine
 from app.ai_engine.safety import SafetyFilter
+from app.core.limiter import limiter
 
 from app.core.ai_engine import get_query_engine, get_doc_processor, get_vector_manager
 
@@ -91,11 +92,13 @@ async def chat(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/public-chat")
+@limiter.limit("15/minute")
 async def public_chat(
-    request: PublicChatRequest,
+    request: Request,
+    payload: PublicChatRequest,
     db: Session = Depends(get_db)
 ):
-    query = request.question or request.message
+    query = payload.question or payload.message
     if not query:
         raise HTTPException(status_code=400, detail="Either 'question' or 'message' field is required")
 
@@ -106,9 +109,9 @@ async def public_chat(
         raise HTTPException(status_code=400, detail=reason)
 
     # Get college by slug
-    college = db.query(College).filter(College.slug == request.college_slug).first()
+    college = db.query(College).filter(College.slug == payload.college_slug).first()
     if not college:
-        raise HTTPException(status_code=404, detail=f"College '{request.college_slug}' not found")
+        raise HTTPException(status_code=404, detail=f"College '{payload.college_slug}' not found")
 
     query_engine = get_query_engine(college.id)
     if not query_engine:
@@ -117,13 +120,13 @@ async def public_chat(
         start_time = time.time()
         
         # Query in English for best context matching
-        result = query_engine.answer_question_with_sources(query, request.conversation_history)
+        result = query_engine.answer_question_with_sources(query, payload.conversation_history)
         answer = safety.check_output(result["answer"])
         
         # Translate final answer post-generation if target language is not English
-        if request.language and request.language.lower() != "english":
+        if payload.language and payload.language.lower() != "english":
             try:
-                answer = query_engine.translate(answer, request.language)
+                answer = query_engine.translate(answer, payload.language)
             except Exception as tr_err:
                 print(f"DEBUG: Translation failed: {tr_err}")
         response_time_ms = int((time.time() - start_time) * 1000)
@@ -147,6 +150,7 @@ async def public_chat(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 class TranslateRequest(BaseModel):
     text: str
