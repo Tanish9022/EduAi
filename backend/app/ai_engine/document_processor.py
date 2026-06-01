@@ -5,7 +5,7 @@ from typing import List
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from PIL import Image
-import google.generativeai as genai
+from google import genai
 from app.core.config import settings
 
 class DocumentProcessor:
@@ -17,7 +17,9 @@ class DocumentProcessor:
             is_separator_regex=False,
         )
         if settings.GEMINI_API_KEY:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
+            self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        else:
+            self.client = None
 
     def process_file(self, file_path: str) -> List[Document]:
         """Unified method to process .txt, .pdf, .docx, and image files."""
@@ -62,12 +64,14 @@ class DocumentProcessor:
                         img_data = pix.tobytes("png")
                         with Image.open(io.BytesIO(img_data)) as img:
                             img.load()
-                            model = genai.GenerativeModel('gemini-3.5-flash')
                             prompt = (
                                 "This is a page from a scanned PDF document. Extract all readable text, tables, "
                                 "dates, and structure. Keep the output clean, accurate, and in the original language."
                             )
-                            response = model.generate_content([prompt, img])
+                            response = self.client.models.generate_content(
+                                model='gemini-2.5-flash',
+                                contents=[prompt, img]
+                            )
                             page_text = response.text
                     except Exception as e:
                         print(f"Warning: Gemini failed to transcribe scanned page {i+1}: {e}")
@@ -103,7 +107,6 @@ class DocumentProcessor:
         try:
             with Image.open(file_path) as img:
                 img.load()
-                model = genai.GenerativeModel('gemini-2.5-flash')
                 
                 prompt = (
                     "Describe this document image in full detail. Extract all readable text, tables, graphs, "
@@ -111,7 +114,10 @@ class DocumentProcessor:
                     "so that it can be searched and referenced by an AI admissions assistant."
                 )
                 
-                response = model.generate_content([prompt, img])
+                response = self.client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=[prompt, img]
+                )
                 text = response.text
         except Exception as e:
             raise RuntimeError(f"Failed to process image with Gemini: {str(e)}")
