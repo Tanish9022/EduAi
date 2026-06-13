@@ -30,11 +30,17 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 from app.core.ai_engine import init_ai_engine
+from app.jobs.scheduler import start_scheduler, stop_scheduler
 
 # Initialize AI Engine on startup
 @app.on_event("startup")
 async def startup_event():
     init_ai_engine()
+    start_scheduler()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    stop_scheduler()
 
 @app.get("/")
 async def root():

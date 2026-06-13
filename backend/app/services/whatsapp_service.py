@@ -45,7 +45,8 @@ import asyncio
 import httpx
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
-from app.models.models import ChatLog, College, Broadcast
+from app.models.models import ChatLog, College, Broadcast, Student, Assignment, Notice, Placement, Scholarship, ExamSchedule, Resource, Timetable, QueryLog
+from app.core.router import SmartRouter
 from app.core.ai_engine import get_query_engine
 from app.core.config import settings
 from app.ai_engine.safety import SafetyFilter
@@ -180,36 +181,60 @@ class WhatsAppService:
             if not text_body:
                 return {"status": "ignored", "reason": "Empty message body"}
 
-            # Lookup College matching wa_phone_number_id
             college = db.query(College).filter(College.wa_phone_number_id == wa_business_phone_number_id).first()
             if not college:
                 print(f"[WhatsAppService] College not found for phone_number_id: {wa_business_phone_number_id}")
                 return {"status": "error", "reason": "College mapping not found"}
 
-            # Input Safety Check
-            safety = SafetyFilter()
-            is_safe, reason = safety.check_input(text_body)
-            if not is_safe:
-                ai_response = f"I'm sorry, I cannot process this query: {reason}"
+            # Student Onboarding Flow
+            student = db.query(Student).filter(Student.phone_number == from_number).first()
+            
+            if not student:
+                student = Student(
+                    college_id=college.id,
+                    phone_number=from_number
+                )
+                db.add(student)
+                db.commit()
+                ai_response = "Welcome to EduAI! To serve you better, please reply with your Department (e.g., Computer Science, IT, etc.)."
                 await self.send_text_message(from_number, ai_response, wa_business_phone_number_id)
-                return {"status": "rejected", "reason": reason}
-
-            # Retrieve RAG query engine
-            query_engine = get_query_engine(college.id)
-            if not query_engine:
-                ai_response = "I'm sorry, our system is currently under maintenance. Please try again later."
+                return {"status": "onboarding_step_1"}
+            
+            if not student.department:
+                student.department = text_body
+                db.commit()
+                ai_response = "Great! Now, what is your Year? (e.g., FY, SY, TY, etc.)"
                 await self.send_text_message(from_number, ai_response, wa_business_phone_number_id)
-                return {"status": "error", "reason": "AI Engine not ready"}
+                return {"status": "onboarding_step_2"}
+                
+            if not student.year:
+                student.year = text_body
+                db.commit()
+                ai_response = "Got it. Finally, what is your Division? (e.g., A, B, C)"
+                await self.send_text_message(from_number, ai_response, wa_business_phone_number_id)
+                return {"status": "onboarding_step_3"}
+                
+            if not student.division:
+                student.division = text_body
+                db.commit()
+                ai_response = "Thanks! Your profile is complete. How can I help you today?"
+                await self.send_text_message(from_number, ai_response, wa_business_phone_number_id)
+                return {"status": "onboarding_complete"}
 
-            # Load multi-turn history
-            history = chat_history_manager.get_history(from_number)
-
+            # Smart Router implementation via Unified Chat Service
+            from app.services.chat_service import chat_service
+            
             start_time = time.time()
+            history = chat_history_manager.get_history(from_number)
             
-            # Execute RAG query (reusing the same pipeline method)
-            result = query_engine.answer_question_with_sources(text_body, history)
-            ai_response = safety.check_output(result["answer"])
-            
+            ai_response = chat_service.process_message(
+                text_body=text_body,
+                college=college,
+                db=db,
+                student=student,
+                chat_history=history
+            )
+
             response_time_ms = int((time.time() - start_time) * 1000)
 
             # Update memory history

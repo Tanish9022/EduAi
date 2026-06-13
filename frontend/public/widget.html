@@ -101,12 +101,17 @@
     }
 
     body {
-      background-color: var(--bg-app);
+      background-color: transparent;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 100vw;
+      overflow: hidden; /* Prevent iframe scrolling */
+      pointer-events: none; /* Allow clicks to pass through to the parent site */
       transition: background-color var(--transition-speed) ease;
+    }
+
+    /* Re-enable clicks for the actual widget components */
+    .chat-fab, .chat-container, .popover-bubble {
+      pointer-events: auto;
     }
 
     /* --- FLOATING ACTION BUTTON (FAB) --- */

@@ -62,13 +62,21 @@ async def chat(
     if not is_safe:
         raise HTTPException(status_code=400, detail=reason)
 
-    query_engine = get_query_engine(current_user.college_id)
-    if not query_engine:
-        raise HTTPException(status_code=503, detail="AI Engine not initialized")
+    from app.services.chat_service import chat_service
+    
+    college = db.query(College).filter(College.id == current_user.college_id).first()
+
     try:
         start_time = time.time()
-        result = query_engine.answer_question_with_sources(query, request.conversation_history)
-        answer = safety.check_output(result["answer"])
+        
+        answer = chat_service.process_message(
+            text_body=query,
+            college=college,
+            db=db,
+            student=None,
+            chat_history=request.conversation_history
+        )
+        
         response_time_ms = int((time.time() - start_time) * 1000)
 
         # Log to DB
@@ -84,7 +92,7 @@ async def chat(
 
         return {
             "answer": answer,
-            "sources": result["sources"],
+            "sources": [],
             "college_id": current_user.college_id
         }
     except Exception as e:
@@ -113,25 +121,33 @@ async def public_chat(
     if not college:
         raise HTTPException(status_code=404, detail=f"College '{payload.college_slug}' not found")
 
-    query_engine = get_query_engine(college.id)
-    if not query_engine:
-        raise HTTPException(status_code=503, detail="AI Engine not initialized")
+    from app.services.chat_service import chat_service
+
     try:
         start_time = time.time()
         
-        # Query in English for best context matching
-        result = query_engine.answer_question_with_sources(query, payload.conversation_history)
-        answer = safety.check_output(result["answer"])
+        # We query the unified Chat Service exactly like WhatsApp does
+        answer = chat_service.process_message(
+            text_body=query,
+            college=college,
+            db=db,
+            student=None, # Public chat doesn't know the student
+            chat_history=payload.conversation_history
+        )
         
         # Translate final answer post-generation if target language is not English
         if payload.language and payload.language.lower() != "english":
             try:
-                answer = query_engine.translate(answer, payload.language)
+                # If RAG is needed, we would need query_engine, but we can get it manually for translation
+                query_engine = get_query_engine(college.id)
+                if query_engine:
+                    answer = query_engine.translate(answer, payload.language)
             except Exception as tr_err:
                 print(f"DEBUG: Translation failed: {tr_err}")
+                
         response_time_ms = int((time.time() - start_time) * 1000)
 
-        # Log to DB
+        # Log exchange to ChatLog DB with channel = "web_public"
         chat_log = ChatLog(
             college_id=college.id,
             user_query=query,

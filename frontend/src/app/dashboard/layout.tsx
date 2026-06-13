@@ -11,7 +11,12 @@ import {
   X,
   User,
   Bell,
-  Users
+  Users,
+  BookOpen,
+  Calendar,
+  Briefcase,
+  Award,
+  FileBox
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -41,6 +46,13 @@ export default function DashboardLayout({
 
   const navItems = [
     { name: "Documents", href: "/dashboard/documents", icon: FileText },
+    { name: "Students", href: "/dashboard/students", icon: User },
+    { name: "Assignments", href: "/dashboard/assignments", icon: BookOpen },
+    { name: "Notices", href: "/dashboard/notices", icon: Bell },
+    { name: "Events", href: "/dashboard/events", icon: Calendar },
+    { name: "Placements", href: "/dashboard/placements", icon: Briefcase },
+    { name: "Scholarships", href: "/dashboard/scholarships", icon: Award },
+    { name: "Resources", href: "/dashboard/resources", icon: FileBox },
     { name: "Enquiries", href: "/dashboard/enquiries", icon: Users },
     { name: "Chat Monitor", href: "/dashboard/chat", icon: MessageSquare },
   ];
